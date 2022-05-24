@@ -160,13 +160,24 @@ def haversine_vector(array1, array2, unit=Unit.KILOMETERS, comb=False):
 
 
 def inverse_haversine(point, distance, direction: Union[Direction, float], unit=Unit.KILOMETERS):
+    """
+    Calculate the position of a second location, by either giving a distance and
+    a direction or the two components of the distance. (North and West positiv)
+    """
 
     lat, lng = point
     lat, lng = map(radians, (lat, lng))
-    d = distance
+    if type(distance) is int:
+        d = distance
+    elif type(distance) is list:
+        x, y = distance
+        lat_temp, lon_temp = inverse_haversine(point, x, 270)
+        point = (lat_temp, lon_temp)
+        print('only true for small distances!')
+        return inverse_haversine(point, y, 0)
+
     r = get_avg_earth_radius(unit)
     brng = direction.value if isinstance(direction, Direction) else direction
-
     return_lat = asin(sin(lat) * cos(d / r) + cos(lat) * sin(d / r) * cos(brng))
     return_lng = lng + atan2(sin(brng) * sin(d / r) * cos(lat), cos(d / r) - sin(lat) * sin(return_lat))
 
